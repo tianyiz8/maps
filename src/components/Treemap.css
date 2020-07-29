@@ -1,0 +1,14 @@
+text {
+  font-size: 8px;
+}
+
+.tipcard {
+  font-family: 'Merriweather', serif;
+  color: white;
+  background-color: rgba(0,0,0,0.7);
+  padding: 1%;
+}
+
+.intro {
+  /* display: flex; */
+}
