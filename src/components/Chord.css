@@ -1,3 +1,7 @@
 .contain {
   display: flex;
 }
+
+text {
+  font-size: 2rem;
+}

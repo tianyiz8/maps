@@ -1,6 +1,7 @@
 import React, { useEffect, useState, useRef } from 'react';
 import * as d3 from 'd3';
 import d3Tip from "d3-tip";
+import M from 'materialize-css';
 import * as datain from '../files/trade.csv';
 import dataProcess from '../dataprocess';
 import './Treemap.css'
@@ -14,11 +15,11 @@ const Treemap = () => {
   const [arrState, setArrState] = useState([]);
   const svgRef = useRef();
   const graphRef = useRef();
-  let nodes = undefined
+  let nodes = undefined;
   const tip = d3Tip()
                 .attr('class', 'tipcard')
                 .html(d => {
-                  let content = `<div class="year">Year: ${d.data.year}</div>`;
+                  let content = `<div class="year" style="position: relative; top: 5px">Year: ${d.data.year}</div>`;
                   content += `<div class="product">Product: ${d.data.sctg2_description}</div>`
                   if (!d.data.value) {
                     return content;
@@ -31,7 +32,9 @@ const Treemap = () => {
     d3.csv(datain).then(res => {
       setData(res);
     });
-    const svg = d3.select(svgRef.current).attr('width', 1060).attr('height', 800);
+    var elems = document.querySelectorAll('select');
+    M.FormSelect.init(elems, {});
+    const svg = d3.select(svgRef.current).attr('height', 800);
     const graph = d3.select(graphRef.current).attr('transform', 'translate(50, 50)');
   }, [])
 
@@ -100,16 +103,17 @@ const Treemap = () => {
   }
 
   return (
-    <div>
-      <div className="intro">
+    <div className="container" style={{marginTop: '3%'}}>
+      <div className="input-field col m6 s12" style={{marginTop: '3%', marginBottom: 0}}>
         <select name="state" id="state" onChange={handleselect}>
-          <option value="">--Please select one state--</option>
+          <option value="" disabled selected>Choose your option</option>
           {renderSelect(stateArr)}
         </select>
-        <p>Notes: Red means trade deficit, Green means trade surplus</p>
+        <label>Please select a State</label>
+        <p className="grey-text text-lighten-1">Notes: Red means trade deficit, Green means trade surplus</p>
       </div>
-      <div className="canvas">
-        <svg ref={svgRef}>
+      <div className="canvas" style={{marginTop: '-3%'}}>
+        <svg ref={svgRef} style={{width: '100%', marginLeft: '-3%'}}>
           <g ref={graphRef}></g>
         </svg>
       </div>

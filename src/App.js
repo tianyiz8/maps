@@ -5,7 +5,8 @@ import Flow from './components/Flow';
 import Gdpmap from './components/Gdpmap';
 import Treemap from './components/Treemap';
 import About from './components/About'
-import NavigationBar from './subcomponents/NavigationBar'
+import Nav from './subcomponents/Nav';
+import Footer from './subcomponents/Footer';
 
 class App extends Component {
   state = {  }
@@ -13,7 +14,7 @@ class App extends Component {
     return (
       <Fragment>
         <Router>
-        <NavigationBar />
+        <Nav></Nav>     
           <Switch>
             <Route exact component={ Chord } path='/chord' />
             <Route exact component={ Flow } path='/flow' />
@@ -21,6 +22,7 @@ class App extends Component {
             <Route exact component={ Treemap } path='/treemap' />
             <Route exact component={ About } path='/' />
           </Switch>
+          <Footer></Footer>
         </Router>
       </Fragment>
     );

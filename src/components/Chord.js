@@ -1,26 +1,22 @@
 import React, { useEffect, useState, useRef, Fragment } from 'react';
 import * as d3 from 'd3';
-import d3Tip from "d3-tip";
 import { Container, Row, Col } from 'react-bootstrap';
+import M from 'materialize-css';
 import * as datain from '../files/flows_chord.json';
 import './Chord.css'
 
 
 const Chord = () => {
   const [leftYear, setLeftYear] = useState('');
-  const [rightYear, setRightYear] = useState('');
   const [leftCategory, setLeftCategory] = useState('');
-  const [rightCategory, setRightCategory] = useState('');
   const [data, setData] = useState({});
   const svg1Ref = useRef();
-  const svg2Ref = useRef();
-  const group1Ref = useRef();
-  const group2Ref = useRef();
 
   useEffect(() => {
+    const elems = document.querySelectorAll('select');
+    M.FormSelect.init(elems, {});
     setData(datain.default);
-    const svg1 = d3.select(svg1Ref.current).attr('width', 580).attr('height', 800);
-    const svg2 = d3.select(svg2Ref.current).attr('width', 580).attr('height', 800);
+    d3.select(svg1Ref.current).attr('height', 800);
   }, [])
 
   useEffect(() => {
@@ -36,18 +32,18 @@ const Chord = () => {
                   .sortSubgroups(d3.descending)
                   (matrix)
     
-    console.log(res)
-    d3.select(svg1Ref.current)
+    const groups = d3.select(svg1Ref.current)
       .datum(res)
       .append("g")
-      .attr('transform', 'translate(240, 330)')
+      .attr('transform', 'translate(300, 330)')
       .selectAll("g")
       .data(d => d.groups)
       .enter()
       .append("g")
-      .on("mouseover", (d,i) => fade(d,i,0.1))
-      .on("mouseout", (d,i) => fade(d,i,1))
-      .append("path")
+        .on("mouseover", (d,i) => fade(d,i,0.1))
+        .on("mouseout", (d,i) => fade(d,i,1))
+
+    groups.append("path")
         .style("fill", (d,i) => colors[i])
         .style("stroke", (d,i) => colors[i])
         // .attr('stroke-width', )
@@ -55,18 +51,40 @@ const Chord = () => {
           .innerRadius(210)
           .outerRadius(240)
         )
-      
+
+    groups.append('text')
+          .each(d => d.angle = (d.startAngle + d.endAngle) / 2)
+          .attr("text-anchor", d => d.angle > Math.PI ? "end" : null)
+          .attr("transform", function (d) {
+            return "rotate(" + (d.angle * 180 / Math.PI - 90) + ")" +
+              "translate(" + (250 + 0) + ")" +
+              (d.angle > Math.PI ? "rotate(180)" : "");
+          })
+          .text((d, i) => names[i]);
+
+    //links between arsc
     d3.select(svg1Ref.current)
       .datum(res)
       .append("g")
-      .attr('transform', 'translate(240, 330)')
+      .attr('transform', 'translate(300, 330)')
       .selectAll("path")
       .data(d => d)
       .enter()
       .append("path")
         .attr("d", d3.ribbon().radius(210))
-        .style('fill', d => colors[d.source.index])
-        .style("stroke", d => colors[d.source.index]);
+        .style('fill', d => {
+          console.log(d)
+          if (d.source.value < 200) {
+            return 'transparent';
+          }
+          return colors[d.source.index]
+        })
+        .style("stroke", d => {
+          if (d.source.value < 200) {
+            return 'transparent';
+          }
+          return colors[d.source.index]
+        });
 
     
     return () => {
@@ -79,38 +97,37 @@ const Chord = () => {
     if (!d || !i) {
       return;
     }
-    console.log(d, i)
+
     d3.selectAll('path').filter(d => {
-      console.log(d)
+      if (!d) {
+        return;
+      }
       if (!d.source || !d.target) {
         return;
       }
       return d.source.index !== i && d.target.index !== i
-    })
-      .transition().duration(500)
-      .style("stroke-opacity", opacity)
-      .style("fill-opacity", opacity);
+    }).transition().duration(300)
+    .style('opacity', opacity)
+      
+    
+
+    
   }
 
   const handleSelecLefttYear = e => {
     setLeftYear(e.target.value)
   }
 
-  const handleSelectRightYear = e => {
-    setRightYear(e.target.value)
-  }
 
   const handleSelectLeftCat = e => {
     setLeftCategory(e.target.value)
   }
 
-  const handleSelectRightCat = e => {
-    setRightCategory(e.target.value)
-  }
 
   const renderOptions = () => {
     return (
       <Fragment>
+        <option value="" disabled selected>Choose your option</option>
         <option value="1">Animals & fish (live)</option>
         <option value="2">Cereal grains and seed</option>
         <option value="3">Agricultural products (excl. feed, grains, and forage)</option>
@@ -125,7 +142,7 @@ const Chord = () => {
   const renderyears = () => {
     return (
       <Fragment>
-        <option value="">--Please select year--</option>
+        <option value="" disabled selected>Choose your option</option>
         <option value="2012">2012</option>
         <option value="2017">2017</option>
       </Fragment>
@@ -133,47 +150,29 @@ const Chord = () => {
   }
 
   return (
-    <div>
-      <Container>
-        <Row>
-          <Col>
+    <div className="container">
+      <div className="row" style={{marginTop: '3%'}}>
+          <div className="input-field col l6">
             <select id="year1" onChange={handleSelecLefttYear}>
-              {renderyears()}
+            {renderyears()}
             </select> 
+          <label htmlFor="">Please select year</label>
+          </div>
+          <div className="input-field col l6">
             <select id="sector1" onChange={handleSelectLeftCat}>
-              <option value="">--Please select one category--</option>
-              {renderOptions()}
-            </select> 
-          </Col>
-          <Col>
-            <select id="year1" onChange={handleSelectRightYear}>
-              {renderyears()}
-            </select> 
-
-            <select id="sector1" onChange={handleSelectRightCat}>
-              <option value="">--Please select one category--</option>
-              {renderOptions()}
-            </select> 
-          </Col>
-      </Row>
-      <Row>
-        <Col>
-          <div className="chords" id="chord1">
-            <svg id='first' ref={svg1Ref} >
-              
-            </svg>
+            {renderOptions()}
+            </select>
+            <label htmlFor="">Please select category</label>
           </div>
-        </Col>
-        <Col>
-          <div className="chords" id="chord2">
-            <svg id="second" ref={svg2Ref} >
-              
-            </svg>
+      </div>
+          <div className="row" id="chord1">
+            <div className="col l12 m12 s12 center">
+              <svg id='first' ref={svg1Ref} style={{width: '100%', marginLeft: '20%'}}>
+                
+              </svg>
+            </div>
           </div>
-        </Col>
-      </Row>
-    </Container>
-  </div>
+    </div>
   )
 };
 
